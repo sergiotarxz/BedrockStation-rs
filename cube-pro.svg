@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   sodipodi:docname="cube-pro.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#0f2d57"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.1386719"
+     inkscape:cx="243.70497"
+     inkscape:cy="264.78216"
+     inkscape:window-width="1920"
+     inkscape:window-height="1003"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="-2.2267246 : 200.11439 : 1"
+       inkscape:vp_y="0 : 1110.6248 : 0"
+       inkscape:vp_z="522.90123 : 200.11439 : 1"
+       inkscape:persp3d-origin="260.33725 : 105.34108 : 1"
+       id="perspective1" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#4b874a;fill-opacity:1;stroke:#faffa6;stroke-width:0.453827"
+       d="M 265.39901,0 0.25024636,138.45115 279.80088,254.68413 511.32969,138.09637 Z"
+       id="path11" />
+    <path
+       style="fill:#726561;fill-opacity:1;stroke:#faffa6;stroke-width:0.453827"
+       d="M 279.80088,254.68413 263.74489,511.98083 511.7864,385.52345 511.32969,138.09637 279.80088,254.68413 0.25024636,138.45115 -0.25024636,416.54684 263.92609,511.70898 Z"
+       id="path12" />
+    <ellipse
+       style="fill:#ff2436;stroke:#faffa6;stroke-width:0.3;fill-opacity:1"
+       id="path1"
+       cx="410.2995"
+       cy="144.30095"
+       rx="101.55051"
+       ry="93.74707" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:116.742px;font-family:'URW Gothic';-inkscape-font-specification:'URW Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#f6f6f6;fill-opacity:1;stroke:#faffa6;stroke-width:0.182411"
+       x="400.92337"
+       y="140.86034"
+       id="text1"
+       transform="scale(0.82729738,1.2087552)"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         x="400.92337"
+         y="140.86034"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:116.742px;font-family:'URW Gothic';-inkscape-font-specification:'URW Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.182411">pro</tspan></text>
+  </g>
+</svg>

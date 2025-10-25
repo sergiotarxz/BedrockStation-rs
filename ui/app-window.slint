@@ -1,0 +1,71 @@
+import { Button, VerticalBox, HorizontalBox, LineEdit } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+	width: 500px;
+	height: 500px;
+	icon: @image-url("../cube-pro.png");
+	title: "Bedrock Station";
+	callback edited_server_address(string);
+	callback edited_port(string);
+	callback accept_only_numbers(string) -> bool;
+	callback clicked_start_stop_button();
+	in-out property <string> server_address: "nuevomundoplus.";
+	in-out property <string> port: "19132";
+	in-out property <bool> server_started: false;
+	in property <string> start_stop_button_string: ""; 
+	VerticalBox {
+		HorizontalBox {
+		        width: 500px;
+			Text {
+				height: 20px;
+				vertical-alignment: center;
+				text: "Dirección del servidor";
+			}
+			LineEdit {
+				horizontal-alignment: right;
+				height: 30px;
+				width: 300px;
+				text: server_address;
+				edited(text) => {
+					edited_server_address(text);
+				}
+			}
+		}
+		HorizontalBox {
+		        width: 500px;
+			Text {
+				height: 20px;
+				vertical-alignment: center;
+				text: "Puerto";
+			}
+			LineEdit {
+				horizontal-alignment: right;
+				height: 30px;
+				width: 300px;
+				text: port;
+				edited(text) => {
+					edited_port(text);
+				}
+				key-pressed(event) => {
+				        if (event.modifiers.alt 
+						|| event.modifiers.control
+						|| event.modifiers.meta) {
+						return reject;
+					}
+					if (!accept_only_numbers(event.text)) {
+						return accept;
+					}
+					return reject;
+				}
+			}
+		}
+		start_stop_button := Button {
+			text: root.start_stop_button_string;
+			width: 100px;
+			height: 40px;
+			clicked() => {
+				clicked_start_stop_button();
+			}
+		}
+	}
+}
