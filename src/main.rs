@@ -39,9 +39,9 @@ use std::thread::JoinHandle;
 use std::net::SocketAddr::V4;
 use std::net::SocketAddrV4;
 
-
 slint::include_modules!();
 
+static mut SHOW_NOW: bool = false;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -225,6 +225,12 @@ fn set_timer(ui: &AppWindow, join: &Arc<Mutex<Option<JoinHandle<()>>>>) -> Timer
     let join = Arc::clone(&join);
     timer.start(TimerMode::Repeated, std::time::Duration::from_millis(100), move || {
         let ui = weak.unwrap();
+        unsafe {
+            if SHOW_NOW {
+                let _ = ui.show();
+                SHOW_NOW = false;
+            }
+        }
         change_server_started_status(&ui, &join);
         let mut buffer = String::with_capacity(128);
         let mut i = 5;
@@ -276,7 +282,7 @@ fn change_server_started_status(ui: &AppWindow, join: &Arc<Mutex<Option<std::thr
             ui.set_server_started(true);
         }
         let _ = ui.hide();
-        let _ = ui.show();
+        SHOW_NOW = true;
     }
 }
 
