@@ -1,5 +1,9 @@
 # BedrockStation-rs
 
+## ¿Como se ve la aplicación?
+
+![](https://raw.githubusercontent.com/sergiotarxz/BedrockStation-rs/30347b0c531ca0f8a9523648501eaf66ed0a1cf9/mainscreen-screenshot.png)
+
 ## ¿Qué es esto?
 
 Esta aplicación sirve para conectar Minecraft de PlayStation y posiblemente Xbox
