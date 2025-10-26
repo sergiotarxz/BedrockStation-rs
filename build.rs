@@ -1,5 +1,4 @@
 use std::env;
-use std::io;
 use winresource::WindowsResource;
 fn main() {
     slint_build::compile("ui/app-window.slint").unwrap();

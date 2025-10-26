@@ -2,7 +2,6 @@
 
 use std::error::Error;
 use std::env::set_var;
-use std::process::exit;
 use std::fs::File;
 use std::io::Write;
 use std::io::BufReader;
@@ -18,7 +17,6 @@ use slint::run_event_loop;
 use slint::set_xdg_app_id;
 use process_alive::Pid;
 use process_alive::State;
-use std::sync::atomic::Ordering;
 use std::io::Read;
 use slint::TimerMode;
 use slint::Timer;
@@ -26,22 +24,18 @@ use interprocess::local_socket::ListenerOptions;
 use interprocess::local_socket::ListenerNonblockingMode;
 use interprocess::local_socket::ToNsName;
 use interprocess::local_socket::GenericNamespaced;
-use interprocess::local_socket::traits::ListenerExt;
 use interprocess::local_socket::Name;
 use interprocess::local_socket;
 use interprocess::local_socket::traits::Listener;
 use std::thread;
 use std::sync::Arc;
 use std::option::Option;
-use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::TryRecvError;
 use std::sync::Mutex;
-use std::sync::atomic::AtomicPtr;
 use std::thread::JoinHandle;
-use std::ptr::null_mut;
 use std::net::SocketAddr::V4;
 use std::net::SocketAddrV4;
 
@@ -146,7 +140,8 @@ fn start() {
     let ui_boxed = Box::new(AppWindow::new().unwrap());
     let ui = ui_boxed.as_ref();
     let _ = set_xdg_app_id("me.sergiotarxz.bedrockstation.rust");
-    let timer = set_callbacks(ui);
+    // Has to be on scope to avoid timer to dissapear
+    let _timer = set_callbacks(ui);
     set_button_stopped(ui);
     let result = ui.show();
     if let Err(error) = result {
@@ -173,9 +168,8 @@ fn start_server(ui: &AppWindow, rx: Arc<Mutex<Receiver<()>>>, join: &Arc<Mutex<O
         let rx = rx_closure.lock().unwrap();
         let socket = UdpSocket::bind("0.0.0.0:".to_owned()+server_port.as_str());
         let socket = socket.unwrap();
-        socket.set_nonblocking(true);
+        let _ = socket.set_nonblocking(true);
         let mut client_to_server = HashMap::<SocketAddrV4, UdpSocket>::new();
-        let starting_port = 20000;
         loop {
             let recv = (*rx).try_recv();
             if let Ok(_) = recv {
@@ -184,7 +178,7 @@ fn start_server(ui: &AppWindow, rx: Arc<Mutex<Receiver<()>>>, join: &Arc<Mutex<O
             if let Err(TryRecvError::Disconnected) = recv {
                 break;
             }
-            for i in 0..5 {
+            for _i in 0..5 {
                 let mut buffer = [0; 1024];
                 if let Ok((amt, src)) = socket.recv_from(&mut buffer) {
                     let buffer = &mut buffer[..amt];
@@ -192,21 +186,23 @@ fn start_server(ui: &AppWindow, rx: Arc<Mutex<Receiver<()>>>, join: &Arc<Mutex<O
                         if let None = client_to_server.get(&src) {
                             let server_socket = UdpSocket::bind("0.0.0.0:".to_owned()+ &src.port().to_string());
                             let server_socket = server_socket.unwrap();
-                            server_socket.set_nonblocking(true);
-                            server_socket.connect(server_address.as_str().to_owned()+":"+server_port.as_str()); 
+                            let _ = server_socket.set_nonblocking(true);
+                            let _ = server_socket.connect(server_address.as_str().to_owned()+":"+server_port.as_str()); 
                             client_to_server.insert(src, server_socket); 
                         }
                         if let Some(server_socket) = client_to_server.get(&src) {
-                            server_socket.send_to(buffer, server_address.as_str().to_owned()+":"+server_port.as_str());
+                            let _ = server_socket.send_to(buffer, server_address.as_str().to_owned()+":"+server_port.as_str());
                         }
                     }
                 }
             }
             for (src, server_socket) in client_to_server.iter() {
-                let mut buffer = [0; 1024]; 
-                if let Ok((amt, src_server)) = server_socket.recv_from(&mut buffer) {
-                    let buffer = &mut buffer[..amt];
-                    socket.send_to(buffer, src);
+                for _i in 0..5 {
+                    let mut buffer = [0; 1024]; 
+                    if let Ok((amt, _)) = server_socket.recv_from(&mut buffer) {
+                        let buffer = &mut buffer[..amt];
+                        let _ = socket.send_to(buffer, src);
+                    }
                 }
             }
         }
@@ -232,13 +228,16 @@ fn set_timer(ui: &AppWindow, join: &Arc<Mutex<Option<JoinHandle<()>>>>) -> Timer
         change_server_started_status(&ui, &join);
         let mut buffer = String::with_capacity(128);
         let mut i = 5;
-        while let conn = listener.accept() {
-            if let Err(error) = conn {
+        loop {
+            let conn = listener.accept();
+            if let Err(_error) = conn {
+                // TODO: Warning of errors here would pollute too much the console log
+                // Find a good way to do so.
                 break;
             }
             let conn = conn.unwrap();
             let mut conn = BufReader::new(conn);
-            while let Ok(ok) = conn.read_line(&mut buffer) {
+            while let Ok(_ok) = conn.read_line(&mut buffer) {
                 buffer = buffer.trim_end_matches(|c| c == '\n' || c == '\r').to_string();
                 if buffer == "show" {
                     println!("Received instructions to resume the window");
@@ -257,27 +256,27 @@ fn set_timer(ui: &AppWindow, join: &Arc<Mutex<Option<JoinHandle<()>>>>) -> Timer
     timer
 }
 
-static mut is_started_last: bool = false;
+static mut IS_STARTED_LAST: bool = false;
 
 fn change_server_started_status(ui: &AppWindow, join: &Arc<Mutex<Option<std::thread::JoinHandle<()>>>>) {
     unsafe {
         if is_server_started(join) {
-            if is_started_last {
+            if IS_STARTED_LAST {
                 return;
             }
-            is_started_last = true;
+            IS_STARTED_LAST = true;
             set_button_started(&ui);
             ui.set_server_started(false);
         } else {
-            if !is_started_last {
+            if !IS_STARTED_LAST {
                 return;
             }
-            is_started_last = false;
+            IS_STARTED_LAST = false;
             set_button_stopped(&ui);
             ui.set_server_started(true);
         }
-        ui.hide();
-        ui.show();
+        let _ = ui.hide();
+        let _ = ui.show();
     }
 }
 
@@ -332,22 +331,22 @@ fn set_callbacks(ui: &AppWindow) -> Timer {
     let weak = ui.as_weak();
     ui.on_clicked_start_stop_button( move || {
         let ui = weak.unwrap(); 
-        let mut join = Arc::clone(&join);
+        let join = Arc::clone(&join);
         if !is_server_started(&join) { 
             ui.set_server_started(true);
-            let mut join = Arc::clone(&join);
+            let join = Arc::clone(&join);
             start_server(&ui, Arc::clone(&rx), &join);
             return;
         }
-        let mut join = Arc::clone(&join);
-        stop_server(&ui, Arc::clone(&tx), &join);
+        let join = Arc::clone(&join);
+        stop_server(Arc::clone(&tx), &join);
     });
     return timer;
 }
 
-fn stop_server(ui: &AppWindow, tx: Arc<Sender<()>>, join: &Arc<Mutex<Option<std::thread::JoinHandle<()>>>>) {
+fn stop_server(tx: Arc<Sender<()>>, join: &Arc<Mutex<Option<std::thread::JoinHandle<()>>>>) {
     if !is_server_started(join) {
         return;
     }
-    (*tx).send(());
+    let _ = (*tx).send(());
 }
